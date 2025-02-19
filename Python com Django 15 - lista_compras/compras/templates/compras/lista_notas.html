@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>Notas de Compras</h2>
+    <a href="{% url 'criar_nota' %}" class="btn btn-primary">Criar Nova Nota</a>
+    <ul class="list-group mt-3">
+        {% for nota in notas %}
+            <li class="list-group-item d-flex justify-content-between">
+                <a href="{% url 'visualizar_nota' nota.id %}">{{ nota.titulo }}</a>
+                <div>
+                    <a href="{% url 'editar_nota' nota.id %}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="{% url 'excluir_nota' nota.id %}" class="btn btn-danger btn-sm">Excluir</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
