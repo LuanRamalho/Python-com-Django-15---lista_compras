@@ -8,6 +8,8 @@ urlpatterns = [
     path('nota/<int:nota_id>/editar/', views.editar_nota, name='editar_nota'),
     path('nota/<int:nota_id>/excluir/', views.excluir_nota, name='excluir_nota'),
     path('nota/<int:nota_id>/adicionar/', views.adicionar_item, name='adicionar_item'),
+    path('nota/<int:nota_id>/comparar_precos/', views.comparar_precos, name='comparar_precos'),
+    path('nota/<int:nota_id>/gerar_pdf/', views.gerar_pdf_precos, name='gerar_pdf_precos'),
     path('item/<int:item_id>/editar/', views.editar_item, name='editar_item'),
     path('item/<int:item_id>/excluir/', views.excluir_item, name='excluir_item'),
 ]
