@@ -1,4 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+from xhtml2pdf import pisa
 from .models import Nota, Item
 from .forms import NotaForm, ItemForm
 
@@ -71,3 +74,31 @@ def excluir_item(request, item_id):
         item.delete()
         return redirect('visualizar_nota', nota_id=nota_id)
     return render(request, 'compras/excluir_item.html', {'item': item})
+
+def comparar_precos(request, nota_id):
+    nota = get_object_or_404(Nota, id=nota_id)
+    if request.method == 'POST':
+        nota.anotacao_precos = request.POST.get('anotacao_precos', '')
+        nota.save()
+        return redirect('visualizar_nota', nota_id=nota.id)
+    return render(request, 'compras/comparar_precos.html', {'nota': nota})
+
+def gerar_pdf_precos(request, nota_id):
+    nota = get_object_or_404(Nota, id=nota_id)
+    
+    # Renderize o template como HTML
+    context = {'nota': nota}
+    html = render_to_string('compras/pdf_precos.html', context)
+    
+    # Crie a resposta HTTP para o arquivo PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="comparacao_precos_{nota_id}.pdf"'
+    
+    # Converta o HTML em PDF
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    
+    # Retorne a resposta com o arquivo PDF gerado
+    if pisa_status.err:
+        return HttpResponse('Erro ao gerar o PDF', status=500)
+    
+    return response
