@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+{% load custom_filters %}
+<div class="container">
+    <h2>Comparação de Preços - {{ nota.titulo }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <textarea name="anotacao_precos" class="form-control" rows="10">{{ nota.anotacao_precos }}</textarea>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="{% url 'gerar_pdf_precos' nota.id %}" class="btn btn-success ml-3">Gerar PDF</a>
+            <a href="{% url 'visualizar_nota' nota.id %}" class="btn btn-secondary ml-3">Voltar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
