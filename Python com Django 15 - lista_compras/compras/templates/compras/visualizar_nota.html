@@ -3,7 +3,11 @@
 {% load custom_filters %}
 <div class="container">
     <h2>Lista de Compras: {{ nota.titulo }}</h2>
-    <a href="{% url 'adicionar_item' nota.id %}" class="btn btn-primary mb-3">Adicionar Item</a>
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{% url 'adicionar_item' nota.id %}" class="btn btn-primary">Adicionar Item</a>
+        <button id="btnGrafico" class="btn btn-info">Dado Gráfico</button>
+        <a href="{% url 'comparar_precos' nota.id %}" class="btn btn-success">Comparar Preços</a>
+    </div>
     <table class="table">
         <thead>
             <tr>
@@ -19,7 +23,7 @@
             <tr>
                 <td>{{ item.nome_produto }}</td>
                 <td>{{ item.quantidade_peso }}</td>
-                <td>R$ {{ item.preco }}</td>
+                <td>R$ {{ item.preco|floatformat:2 }}</td>
                 <td> {{ item.sub_total|default:"0"|format_currency }}</td>
                 <td>
                     <a href="{% url 'editar_item' item.id %}" class="btn btn-warning btn-sm">Editar</a>
@@ -30,5 +34,60 @@
         </tbody>
     </table>
     <p><strong>Total: {{ total_geral|default:"0"|format_currency }}</strong></p>
+    
+    <div id="graficoContainer" style="display: none;">
+        <canvas id="graficoBarras"></canvas>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.getElementById('btnGrafico').addEventListener('click', function() {
+        let graficoContainer = document.getElementById('graficoContainer');
+        graficoContainer.style.display = graficoContainer.style.display === 'none' ? 'block' : 'none';
+        
+        const ctx = document.getElementById('graficoBarras').getContext('2d');
+        
+        const itens = [
+            {% for item in itens %}
+                {"nome": "{{ item.nome_produto }}", "subTotal": {{ item.sub_total }}, "percentual": (({{ item.sub_total }} / {{ total_geral }}) * 100).toFixed(2)},
+            {% endfor %}
+        ];
+        
+        const nomes = itens.map(item => item.nome);
+        const valores = itens.map(item => item.subTotal.toFixed(2));
+        const porcentagens = itens.map(item => item.percentual + '%');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: nomes,
+                datasets: [{
+                    label: 'Sub-Total',
+                    data: valores,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return 'R$' + tooltipItem.raw.replace('.', ',') + ' (' + porcentagens[tooltipItem.dataIndex] + ')';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}
